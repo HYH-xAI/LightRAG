@@ -1,3 +1,9 @@
+"""
+该.py文件集中定义 LightRAG 运行时会用到的一组“提示词模板（prompts）”，
+把不同任务（实体抽取、关系抽取、摘要合并、RAG 回答、关键词抽取等）所需的 system/user prompt 统一放在一个 PROMPTS 字典里，
+供其他模块按 key 取用并在运行时用参数填充
+"""
+
 from __future__ import annotations
 from typing import Any
 
