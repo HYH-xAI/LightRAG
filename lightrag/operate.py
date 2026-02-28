@@ -3420,7 +3420,7 @@ async def _get_vector_context(
         logger.error(f"Error in _get_vector_context: {e}")
         return []
 
-
+# 并发执行多路检索（纯向量+图谱实体+图谱关系）：在入口函数 _perform_kg_search 中，代码会根据用户查询的关键字，同时执行向量库查找和图谱查找
 async def _perform_kg_search(
     query: str,
     ll_keywords: str,
@@ -3486,6 +3486,7 @@ async def _perform_kg_search(
         )
 
     else:  # hybrid or mix mode
+        # 1. 知识图谱实体检索（local）
         if len(ll_keywords) > 0:
             local_entities, local_relations = await _get_node_data(
                 ll_keywords,
@@ -3493,6 +3494,7 @@ async def _perform_kg_search(
                 entities_vdb,
                 query_param,
             )
+        # 2. 知识图谱关系检索（Global）
         if len(hl_keywords) > 0:
             global_relations, global_entities = await _get_edge_data(
                 hl_keywords,
@@ -3501,7 +3503,7 @@ async def _perform_kg_search(
                 query_param,
             )
 
-        # Get vector chunks for mix mode
+        # Get vector chunks for mix mode -- 3. 向量相似度直接检索文本块 (Mix 模式下并发执行 Naive)
         if query_param.mode == "mix" and chunks_vdb:
             vector_chunks = await _get_vector_context(
                 query,
@@ -3862,7 +3864,7 @@ async def _merge_all_chunks(
 
     return merged_chunks
 
-
+# 上下文构建与组装LLM prompt
 async def _build_context_str(
     entities_context: list[dict],
     relations_context: list[dict],
